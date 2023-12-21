@@ -31,6 +31,7 @@ public class AuthenticationServiceImp implements AuthenticationService{
     @Override
     public AuthenticationResponse register(RegistrationRequest request) {
         var user = User.builder()
+                .username(request.getUsername())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

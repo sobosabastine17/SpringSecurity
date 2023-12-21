@@ -3,11 +3,10 @@ package com.example.SpringSecurity.Config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.SignatureAlgorithm;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,10 +29,10 @@ public class JwtService {
         return generateToken(new HashMap<>(0),userDetails);
     }
     public String generateToken(
-            Map<String,Object> extrClaims,
+            Map<String,Object> extraClaims,
             UserDetails userDetails) {
         return builder()
-                .claims(extrClaims)
+                .claims(extraClaims)
                 .subject(userDetails.getUsername())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10))
@@ -45,7 +44,6 @@ public class JwtService {
         final String username = extractUsername(token);
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
-
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
@@ -57,14 +55,13 @@ public class JwtService {
     private Claims extractAllClaims(String token) {
         return Jwts
                 .parser()
-                .setSigningKey(getSigningKey())
+                .verifyWith(getSigningKey())
                 .build()
-                .parseClaimsJws(token)
-                .getBody();
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
-    private Key getSigningKey() {
-        //byte[] keyBytes = Decoders.Base64.decode(SECRET_KEY);
+    private SecretKey getSigningKey() {
         byte[] keyBytes = Base64.getDecoder().decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(keyBytes);
     }

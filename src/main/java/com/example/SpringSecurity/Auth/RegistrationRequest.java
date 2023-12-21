@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegistrationRequest {
     private String firstName;
+    private String username;
     private String lastName;
     private String email;
     private String password;
